@@ -72,8 +72,8 @@ int main(void) {
     hallSetup();    // Timer 1, Timer 2
     //hallSteeringSetup(); //doesn't exist yet
 #else //No hall sensors, standard BEMF control
-    legCtrlSetup(); // Timer 1
-    steeringSetup();  //Timer 5
+    //legCtrlSetup(); // Timer 1
+    //steeringSetup();  //Timer 5
 #endif
 
     //tailCtrlSetup();
@@ -93,7 +93,12 @@ int main(void) {
     //_VREGS = 1;
     //gyroSleep();
 
+    long count = 0;
     while (1) {
+        count ++;
+        LED_GREEN =  count & 0x800 ? 0 : 1; 
+        LED_YELLOW = count&0x1000 ? 0 : 1;
+        
         cmdHandleRadioRxBuffer();
 
 #ifndef __DEBUG //Idle will not work with debug

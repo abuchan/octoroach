@@ -8,7 +8,7 @@ import serial
 from callbackFunc import xbee_received
 import shared
 
-DEST_ADDR = '\x20\x52'
+DEST_ADDR = '\x20\x72'
 imudata_file_name = 'imudata.txt'
 statedata_file_name = 'statedata.txt'
 dutycycle_file_name = 'dutycycle.txt'
@@ -21,7 +21,7 @@ motordata = []
 gainsNotSet = True;
 
 ###### Operation Flags ####
-RESET_ROBOT = False
+RESET_ROBOT = True
 ##########################
 
 

@@ -355,8 +355,17 @@ static void cmdSetThrustOpenLoop(unsigned char status, unsigned char length, uns
     //set motor duty cycles
     //PDC1 = argsPtr->dc1;
     //PDC2 = argsPtr->dc1;
-    mcSetDutyCycle(MC_CHANNEL_PWM1, argsPtr->dc1);
-    mcSetDutyCycle(MC_CHANNEL_PWM2, argsPtr->dc2);
+    #define ROBOT2
+    
+    #ifdef ROBOT2
+    if (argsPtr->dc1 < 0) {
+      mcSetDutyCycle(MC_CHANNEL_PWM1, (-1.0-(argsPtr->dc1))/4.0);
+    #else
+    if(argsPtr->dc1 >= 0) {
+      mcSetDutyCycle(MC_CHANNEL_PWM1, (argsPtr->dc1)/4.0);
+    #endif
+      mcSetDutyCycle(MC_CHANNEL_PWM4, (argsPtr->dc2)/4.0);
+    }
 }
 
 static void cmdSetThrustClosedLoop(unsigned char status, unsigned char length, unsigned char *frame) {
