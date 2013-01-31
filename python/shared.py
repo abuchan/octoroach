@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 DEST_ADDR = '\x20\x72'
 xb = []
 ser = []
@@ -38,3 +39,20 @@ moveq = "NOT SET"
 
 robotQueried = False
 maxQueries = 8
+=======
+#Base station
+#BS_COMPORT = 'COM3'
+#BS_BAUDRATE = 230400
+#XBee
+BS_COMPORT = 'COM4'
+BS_BAUDRATE = 57600
+
+deg2count = 14.375
+count2deg = 1/deg2count
+
+#For download timeout
+last_packet_time = 0
+pkts = 0
+
+ROBOTS = []
+>>>>>>> 59b60439f05fcbe8104c44109cf3f13111cd2be7
