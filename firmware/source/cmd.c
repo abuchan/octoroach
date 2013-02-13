@@ -85,7 +85,7 @@ static void cmdEraseSector(unsigned char status, unsigned char length, unsigned 
 static void cmdFlashReadback(unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdSleep(unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdSetVelProfile(unsigned char status, unsigned char length, unsigned char *frame);
-static void cmdWhoAmI(unsigned char status, unsigned char length, unsigned char *frame);
+//static void cmdWhoAmI(unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdHallTelemetry(unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdZeroPos(unsigned char status, unsigned char length, unsigned char *frame);
 static void cmdSetHallGains(unsigned char status, unsigned char length, unsigned char *frame);
@@ -162,12 +162,13 @@ void cmdHandleRadioRxBuffer(void) {
 
     if ((pld = radioReceivePayload()) != NULL) {
 
+        LED_GREEN ^= 1;
         status = payGetStatus(pld);
         command = payGetType(pld);
 
         //Due to bugs, command may be a surprious value; check explicitly
         if (command <= MAX_CMD_FUNC) {
-            cmd_func[command](status, pld->data_length, payGetData(pld));
+                cmd_func[command](status, pld->data_length, payGetData(pld));
         }
 
         payDelete(pld);
@@ -328,20 +329,12 @@ static void cmdEraseMemSector(unsigned char status, unsigned char length, unsign
 /*-----------------------------------------------------------------------------
  *          AUX functions
 -----------------------------------------------------------------------------*/
+extern unsigned char* sharing_buffer;
+
 void cmdEcho(unsigned char status, unsigned char length, unsigned char *frame) {
 
-    char* temp = malloc(length*sizeof(char));
-    strncpy(temp,(char*)frame,length);
-
     radioSendPayload(macGetDestAddr(), payCreate(length, frame, status, CMD_ECHO));
-    //Payload pld;
-    //pld = payCreateEmpty(1);
-    //paySetStatus(pld, status);
-    //paySetType(pld, CMD_ECHO);
-    //unsigned char temp = 99;
-    //paySetData(pld, 1, &temp);
 
-    //radioSendPayload((WordVal) macGetDestAddr(), pld);
 }
 
 static void cmdNop(unsigned char status, unsigned char length, unsigned char *frame) {

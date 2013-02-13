@@ -8,7 +8,7 @@
 #define __SETTINGS_H
 
 
-#warning "REQUIRED: Review and set radio channel & network parameters in firmware/source/settings.h  , then comment out this line."
+//#warning "REQUIRED: Review and set radio channel & network parameters in firmware/source/settings.h  , then comment out this line."
 /////// Radio settings ///////
 #define RADIO_CHANNEL		0x19
 //#warning "You have changed the radio channel from 0x0E to something else"
@@ -36,5 +36,7 @@
 /////// Configuration options ///////
 //Configure project-wide for Hall Sensor operation
 //#define HALL_SENSORS
+
+#define UART_RADIO
 
 #endif //__SETTINGS_H

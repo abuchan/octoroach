@@ -29,6 +29,8 @@
 #include "tail_ctrl.h"
 #include "ams-enc.h"
 #include "imu.h"
+#include "pwm.h"
+#include "uart_driver.h"
 
 #include <stdlib.h>
 
@@ -39,6 +41,8 @@ extern volatile char g_radio_duty_cycle;
 extern volatile char inMotion;
 
 int dcCounter;
+
+volatile unsigned char sharing_buffer[10];
 
 int main(void) {
 
@@ -62,96 +66,40 @@ int main(void) {
     radioSetChannel(RADIO_CHANNEL); //Set to my channel
     macSetDestAddr(dst_addr_init);
 
-    dfmemSetup();
+    //dfmemSetup();
     //xlSetup();
-    gyroSetup();
+    //gyroSetup();
     mcSetup();
     cmdSetup();
-    adcSetup();
-    telemSetup(); //Timer 5
-    encSetup();
-    imuSetup();
+    //adcSetup();
+    //telemSetup(); //Timer 5
+    //encSetup();
+    //imuSetup();
+    
+    uartInit();
 
     #ifdef  HALL_SENSORS
     hallSetup();    // Timer 1, Timer 2
     hallSteeringSetup(); //doesn't exist yet
     #else //No hall sensors, standard BEMF control
-    legCtrlSetup(); // Timer 1
-    steeringSetup();  //Timer 5
+    //legCtrlSetup(); // Timer 1
+    //steeringSetup();  //Timer 5
     #endif
 
-    //Tail control is a special case
-    //tailCtrlSetup();
-
-    //Camera is untested with current code base, AP 12/6/2012
-    //ovcamSetup();
-
     LED_RED = 1; //Red is use an "alive" indicator
-    LED_GREEN = 0;
+    LED_GREEN = 1;
     LED_YELLOW = 0;
 
     //Radio startup verification
-    if(phyGetState() == 0x16)  { LED_GREEN = 1; }
+    //if(phyGetState() == 0x16)  { LED_GREEN = 0; }
 
     //Sleeping and low power options
     //_VREGS = 1;
     //gyroSleep();
 
     while (1) {
+
         cmdHandleRadioRxBuffer();
 
-#ifndef __DEBUG //Idle will not work with debug
-        //Simple idle:
-        if (radioIsRxQueueEmpty()) {
-            Idle();
-            //_T1IE = 0;
-        }
-#endif
-
-        //delay_ms(1000);
-        //cmdEcho(0, 1 , (unsigned char*)(&i) );
-        //i++;
-        //if(radioIsRxQueueEmpty() && (t1_ticks >= wakeTime + 5000) ){
-        //Idle();
-        //LED_RED = 0;
-        //gyroSleep();
-        //Sleep();
-        //}
     }
-
-    /*
-    if(g_radio_duty_cycle){
-            if(dcCounter == 0){
-                    //LED_GREEN = 1;
-                    atSetRXAACKON();
-            }else{
-                    //LED_GREEN = 0;
-                    atSetTRXOFF();
-            }
-    }
-    else{
-            //LED_GREEN = 1;
-    }
-
-    dcCounter = (dcCounter + 1) % 8;
-		
-    if(radioIsRxQueueEmpty() && !inMotion){
-            //gyroSleep();
-            LED_RED = 0;
-            _SWDTEN = 1; //restart wdt
-            Sleep();
-            //Idle();
-    }
-		
-    //should be asleep here, waiting for WTD wakeup
-    ClrWdt(); //clear wdt
-    _SWDTEN = 0; //software disable wdt
-    LED_RED = 1;
-
-    //spin up clock
-    if(_COSC != 0b010){
-            while(OSCCONbits.LOCK!=1);
-    }
-    //gyroWake();
-    }*/
 }
