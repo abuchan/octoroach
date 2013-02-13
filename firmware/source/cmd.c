@@ -350,8 +350,9 @@ static void cmdSetThrustOpenLoop(unsigned char status, unsigned char length, uns
     //set motor duty cycles
     //PDC1 = argsPtr->dc1;
     //PDC2 = argsPtr->dc1;
-    mcSetDutyCycle(MC_CHANNEL_PWM1, argsPtr->dc1);
-    mcSetDutyCycle(MC_CHANNEL_PWM2, argsPtr->dc2);
+    LED_YELLOW ^=1;
+    SetDCMCPWM(MC_CHANNEL_PWM1, argsPtr->dc1, 0);
+    SetDCMCPWM(MC_CHANNEL_PWM4, argsPtr->dc2, 0);
 }
 
 static void cmdSetThrustClosedLoop(unsigned char status, unsigned char length, unsigned char *frame) {

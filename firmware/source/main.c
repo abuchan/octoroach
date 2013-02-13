@@ -96,7 +96,7 @@ int main(void) {
     //Sleeping and low power options
     //_VREGS = 1;
     //gyroSleep();
-
+    SetDCMCPWM(1, 0, 0);
     while (1) {
 
         cmdHandleRadioRxBuffer();
