@@ -42,29 +42,31 @@ def main():
     xb = setupSerial(shared.BS_COMPORT, shared.BS_BAUDRATE)
     shared.xb = xb
     
-    R1 = Robot('\x20\x52', xb)
+    R1 = Robot('\x20\x72', xb)
+    R2 = Robot('\x20\x73', xb)
 
-    shared.ROBOTS = [R1]
+    shared.ROBOTS = [R1,R2]
 
-    if RESET_ROBOT:
-        print "Resetting robot..."
-        R1.reset()
-        time.sleep(0.5)
-        
-    # Send robot a WHO_AM_I command, verify communications
-    R1.query(retries = 1)
+    for robot in shared.ROBOTS:
+      if RESET_ROBOT:
+          print "Resetting robot at 0x%02X..." % robot.DEST_ADDR_int
+          robot.reset()
+          time.sleep(0.5)
+          
+      # Send robot a WHO_AM_I command, verify communications
+      robot.query(retries = 1)
 
-    motorgains = [20000,200,100,0,0,    20000,200,100,0,0]
-    #motorgains = [25000,50,0,0,25,    25000,50,0,0,25]
+      motorgains = [20000,200,100,0,0,    20000,200,100,0,0]
+      #motorgains = [25000,50,0,0,25,    25000,50,0,0,25]
 
-    R1.setMotorGains(motorgains, retries = 1)
-    
-    #verifyAllMotorGainsSet()  #exits on failure
-    
-    steeringgains = [0, 0, 0, 0, 0, 0]
-    #R1.setSteeringGains(steeringgains)
-    
-    #verifyAllSteeringGainsSet()  #exits on failure
+      robot.setMotorGains(motorgains, retries = 1)
+      
+      #verifyAllMotorGainsSet()  #exits on failure
+      
+      steeringgains = [0, 0, 0, 0, 0, 0]
+      #R1.setSteeringGains(steeringgains)
+      
+      #verifyAllSteeringGainsSet()  #exits on failure
         
     j = setupJoystick()
     
@@ -126,6 +128,7 @@ def main():
             throt = [left_throt,right_throt]
             if throt != lastthrot: #Only send new packet if throttles have changed
                 R1.setMotorSpeeds(left_throt, right_throt)
+                R2.setMotorSpeeds(left_throt, right_throt)
                 lastthrot = throt
                 
             time.sleep(.1)

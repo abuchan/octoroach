@@ -65,9 +65,16 @@ is invalid and void.
 
 unsigned int cmdSetup(void);
 void cmdHandleRadioRxBuffer(void);
-
+unsigned int cmdLastSrcAddr(void);
 
 /////// Argument structures
+
+//cmdGetImuData
+typedef struct _args_cmdGetIMUData{
+    unsigned long sequence;
+    int accel[3];
+    int gyro[3];
+} _args_cmdGetIMUData;
 
 //cmdSetThrustOpenLoop
 typedef struct{

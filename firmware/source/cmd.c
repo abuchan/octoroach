@@ -26,6 +26,7 @@ is invalid and void.
 #include "move_queue.h"
 #include "steering.h"
 #include "telem_service.h"
+#include "imu_service.h"
 #include "leg_ctrl.h"
 #include "tail_ctrl.h"
 //#include "hall.h"
@@ -90,6 +91,8 @@ static void cmdSetTailGains(unsigned char status, unsigned char length, unsigned
 static void cmdSetThrustHall(unsigned char status, unsigned char length, unsigned char *frame, unsigned int src_addr);
 static void cmdSetOLVibe(unsigned char status, unsigned char length, unsigned char *frame, unsigned int src_addr);
 
+static void cmdStreamTelemetry(unsigned char status, unsigned char length, unsigned char *frame, unsigned int src_addr);
+
 /*-----------------------------------------------------------------------------
  *          Public functions
 -----------------------------------------------------------------------------*/
@@ -114,7 +117,9 @@ unsigned int cmdSetup(void) {
     _cmdSetupHandler(CMD_SET_PID_GAINS, cmdSetPIDGains);
     _cmdSetupHandler(CMD_GET_PID_TELEMETRY, cmdGetPIDTelemetry);
     _cmdSetupHandler(CMD_SET_CTRLD_TURN_RATE, cmdSetCtrldTurnRate);
-    _cmdSetupHandler(CMD_STREAM_TELEMETRY, cmdGetImuLoopZGyro);
+
+    _cmdSetupHandler(CMD_STREAM_TELEMETRY, cmdStreamTelemetry);
+
     _cmdSetupHandler(CMD_SET_MOVE_QUEUE, cmdSetMoveQueue);
     _cmdSetupHandler(CMD_SET_STEERING_GAINS, cmdSetSteeringGains);
     _cmdSetupHandler(CMD_SOFTWARE_RESET, cmdSoftwareReset);
@@ -134,6 +139,8 @@ unsigned int cmdSetup(void) {
     return 1;
 }
 
+static unsigned int last_src_addr = 0;
+
 void cmdHandleRadioRxBuffer(void) {
     MacPacket packet;
     Payload pld;
@@ -148,6 +155,7 @@ void cmdHandleRadioRxBuffer(void) {
 
         if (command < MAX_CMD_FUNC) {
             cmd_func[command](status, payGetDataLength(pld), payGetData(pld), rx_src_addr);
+            last_src_addr = rx_src_addr;
         }
         radioReturnPacket(packet);
     }
@@ -155,6 +163,9 @@ void cmdHandleRadioRxBuffer(void) {
     return;
 }
 
+unsigned int cmdLastSrcAddr(void) {
+    return last_src_addr;
+}
 
 /*-----------------------------------------------------------------------------
  * ----------------------------------------------------------------------------
@@ -162,6 +173,17 @@ void cmdHandleRadioRxBuffer(void) {
  * Users are recommended to use functions defined above.
  * ----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
+
+static void cmdStreamTelemetry(unsigned char status, unsigned char length, unsigned char *frame, unsigned int src_addr) {
+    char stream = frame[0];
+    if(stream) {
+        LED_YELLOW = 1;
+    } else {
+        LED_YELLOW = 0;
+    }
+    imuSetStreaming(stream);
+    radioSendData(src_addr, 0, CMD_STREAM_TELEMETRY, length, frame, 0);
+}
 
 static void cmdSetThrust(unsigned char status, unsigned char length, unsigned char *frame, unsigned int src_addr) {
 /*

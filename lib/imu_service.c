@@ -14,6 +14,7 @@
     #include "xl.h"
 #elif defined (__IMAGEPROC25)
     #include "mpu6000.h"
+#include "cmd.h"
 #endif
 
 #define TIMER_FREQUENCY     100.0                 // 300 Hz
@@ -45,6 +46,12 @@ static void imuServiceRoutine(void);  //To be installed with sysService
 //The following local functions are called by the service routine:
 static void imuISRHandler(void);
 
+static int imu_streaming = 0;
+static int imu_data_count = 0;
+static unsigned long imu_sequence = 0;
+static int imu_data_ready = 0;
+static _args_cmdGetIMUData imu_data;
+
 ////   Private functions
 ////////////////////////
 /////////        IMU ISR          ////////
@@ -55,6 +62,22 @@ static void imuServiceRoutine(void){
     //sub-taks to the imu service routine.
     //TODO: Is this neccesary?
     imuISRHandler();
+}
+
+unsigned char* imuPacketData(void) {
+    if (imu_data_ready) {
+        return (unsigned char*)(&imu_data);
+    } else {
+        return (unsigned char*)(0);
+    }
+}
+
+void imuSetStreaming(unsigned int streaming) {
+    imu_streaming = streaming;
+}
+
+void imuClearDataReady(void) {
+    imu_data_ready = 0;
 }
 
 static void imuISRHandler() {
@@ -83,6 +106,20 @@ static void imuISRHandler() {
     lastXL[1] = xlData[1];
     lastXL[2] = xlData[2];
 
+    if(++imu_data_count == 100) {
+        imu_data_count = 0;
+        imu_sequence++;
+        if(imu_streaming && (imu_data_ready==0)) {
+            imu_data.sequence = imu_sequence;
+            imu_data.gyro[0] = lastGyro[0];
+            imu_data.gyro[1] = lastGyro[1];
+            imu_data.gyro[2] = lastGyro[2];
+            imu_data.accel[0] = lastXL[0];
+            imu_data.accel[1] = lastXL[1];
+            imu_data.accel[2] = lastXL[2];
+            imu_data_ready = 1;
+        }
+    }
 
     int i;
     for (i = 0; i < 3; i++) {

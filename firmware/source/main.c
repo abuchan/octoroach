@@ -19,6 +19,7 @@
 #include "init_default.h"
 #include "battery.h"
 #include "cmd.h"
+#include "cmd_const.h"
 #include "radio.h"
 #include "mpu6000.h"
 #include "utils.h"
@@ -104,10 +105,17 @@ int main(void) {
     //_VREGS = 1;
     //gyroSleep();
 
+    unsigned char* next_imu_data;
 
     while (1) {
         cmdHandleRadioRxBuffer();
         radioProcess();
+        next_imu_data = imuPacketData();
+        if (next_imu_data != NULL) {
+            radioSendData(cmdLastSrcAddr(), 0, CMD_GET_IMU_DATA, sizeof(_args_cmdGetIMUData), next_imu_data, 0);
+            LED_YELLOW ^= 1;
+            imuClearDataReady();
+        }
         //TODO: Implement an Idle() condition here for power saving
     }
 }

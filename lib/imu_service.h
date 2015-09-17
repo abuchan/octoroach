@@ -29,6 +29,9 @@ float imuGetBodyZPositionDeg();
 
 void imuTest(float* ptr);
 
+unsigned char* imuPacketData(void);
+void imuClearDataReady(void);
+
 //Constants
 #define GYRO_DRIFT_THRESH 5
 #define LSB2DEG    0.0695652174
